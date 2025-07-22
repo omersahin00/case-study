@@ -6,6 +6,7 @@ declare global {
             user: UserAttributes;
             isSessional?: boolean;
             token?: string;
+            isAuthenticated?: boolean;
         }
     }
 }

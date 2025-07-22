@@ -1,5 +1,6 @@
 import express from "express";
 import { ControllerGroup, ControllerAttributes } from "@/types/controllerAttributes";
+import isAuthForClient from "@/middlewares/auth/isAuthForClient";
 
 const registerRoutes = (router: express.Router, endpoints: ControllerGroup, basePath: string = "") => {
     Object.keys(endpoints).forEach(key => {
@@ -13,8 +14,7 @@ const registerRoutes = (router: express.Router, endpoints: ControllerGroup, base
             
             const middlewares: express.RequestHandler[] = [];
             if (value.auth) {
-                // Auth middleware burada eklenebilir
-                // middlewares.push(authMiddleware);
+                middlewares.push(isAuthForClient);
             }
 
             router.get(url, ...middlewares, value.handler as express.RequestHandler);
@@ -32,8 +32,7 @@ const registerRoutes = (router: express.Router, endpoints: ControllerGroup, base
                         
                         const middlewares: express.RequestHandler[] = [];
                         if (methodValue.auth) {
-                            // Auth middleware burada eklenebilir
-                            // middlewares.push(authMiddleware);
+                            middlewares.push(isAuthForClient);
                         }
 
                         // Client tarafında sadece GET ve POST destekleniyor
