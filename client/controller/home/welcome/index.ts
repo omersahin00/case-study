@@ -29,6 +29,10 @@ const getWelcomePage = async (
                 userEmail = req.user.email;
             }
         }
+
+        // Burada uygulama sayfasına yönlendirilecek (geçici home'a yönlendiriyor):
+        return res.render("home/welcome");
+
     } catch (error: any) {
         // Kullanıcı oturumu açık değil doğrudan login'e yönlendirilecek:
         return res.render("home/welcome");

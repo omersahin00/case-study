@@ -21,14 +21,15 @@ const isAuthForClient = async (
         if (response.status === 200 && response.data.status) {
             req.isAuthenticated = true;
             next();
+
         } else {
             // Oturum geçersizse home sayfasına yönlendir
-            return res.redirect("/home");
+            res.redirect("/home");
         }
 
     } catch (error: any) {
         console.log("Auth check failed:", error.message);
-        return res.redirect("/home");
+        res.redirect("/home");
     }
 };
 

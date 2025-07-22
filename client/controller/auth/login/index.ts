@@ -39,12 +39,12 @@ const postLoginPage = async (
                     secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
                     maxAge: remember ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000 // 7 gün veya 1 gün
                 };
-                
-                res.cookie('authToken', response.data.token, cookieOptions);
+
+                res.cookie("authToken", response.data.token, cookieOptions);
             }
 
             // Ana sayfaya yönlendir
-            return res.redirect('/home');
+            return res.redirect("/game/items");
         }
 
         // API'den gelen hata mesajı

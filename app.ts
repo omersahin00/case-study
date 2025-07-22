@@ -23,6 +23,9 @@ app.use(cookieParser());
 app.set("view engine", "ejs");
 app.set("views", path.join(process.cwd(), "client", "views"));
 
+// Public Routes:
+app.use("/img", express.static(path.join(process.cwd(), "public", "images")));
+
 // ROUTES:
 import routerRestAPI from "./restAPI";
 app.use(routerRestAPI);
