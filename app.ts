@@ -40,6 +40,7 @@ import globalTypes from "./types/globalTypes"; // KULLANIMDA SİLME!
 import unknownRoute from "./restAPI/domains/home/unknownRoute";
 import logger from "./services/logger";
 import Schedulers from "./schedulers";
+import addMockData from "./data/mockData";
 app.use(unknownRoute);
 
 (async (): Promise<void> => {
@@ -48,6 +49,8 @@ app.use(unknownRoute);
             alter: environment === "development" ? true : false
         });
 
+        await addMockData();
+
         server.listen(port, () => {
             logger.info(`API listen on port ${port}`, 1);
         });
@@ -55,6 +58,6 @@ app.use(unknownRoute);
         Schedulers();
 
     } catch (error) {
-        console.error("Error:", error instanceof Error ? error.message : error);
+        console.error("Error in App:", error instanceof Error ? error : error);
     }
 })();

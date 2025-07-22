@@ -1,12 +1,17 @@
 import { sequelize } from "@/data/db";
 import { DataTypes, Model } from "sequelize";
 
-export interface ItemAttributes {
+export interface ItemCreationAttributes {
     id?: string;
     name: string;
 }
 
-export interface ItemInstance extends Model<ItemAttributes>, ItemAttributes {}
+export interface ItemAttributes {
+    id: string;
+    name: string;
+}
+
+export interface ItemInstance extends Model<ItemAttributes, ItemCreationAttributes>, ItemAttributes {}
 
 const Item = sequelize.define<ItemInstance>("items", {
     id: {

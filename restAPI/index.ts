@@ -12,6 +12,8 @@ router.use(validator);
 import serverCheck from "./domains/home/serverCheck";
 import logout from "./domains/auth/logout";
 import loginCheck from "./domains/auth/check";
+import getItem from "./domains/game/getItem";
+import getEnergy from "./domains/game/getEnergy";
 // POST:
 import login from "./domains/auth/login";
 import register from "./domains/auth/register";
@@ -28,6 +30,10 @@ export const endpoints: EndpointGroup = {
         },
         home: {
             check: { handler: serverCheck, method: "GET", auth: false },
+        },
+        game: {
+            getItem: { handler: getItem, method: "GET", auth: true },
+            getEnergy: { handler: getEnergy, method: "GET", auth: true }
         }
     }
 };

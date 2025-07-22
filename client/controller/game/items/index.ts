@@ -5,12 +5,19 @@ const getItemPage = async (
     res: Response
 ) => {
     return res.render("game/items", {
-        level: 2,
+        level: 1,
         experience: 2,
         nextLevelXP: 2,
         itemId: "abc"
     });
 }
 
-export { getItemPage };
-export default { getItemPage };
+const postItemPage = async (
+    req: Request,
+    res: Response
+) => {
+    
+}
+
+export { getItemPage, postItemPage };
+export default { getItemPage, postItemPage };
