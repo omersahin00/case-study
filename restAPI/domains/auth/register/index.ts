@@ -8,8 +8,6 @@ import safeStringCompare from "./safeStringCompare";
 import { EndpointReturn } from "@/types/endpointReturn";
 
 export interface RegisterRequest {
-    firstName: string;
-    lastName: string;
     email: string;
     password: string;
     confirmPassword: string;

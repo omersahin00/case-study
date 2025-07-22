@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+            backdrop-filter: blur(10px);
+        }
+
+        .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 40px 30px;
+        }
+
+        .login-header h1 {
+            font-size: 28px;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .login-header p {
+            opacity: 0.9;
+            font-size: 14px;
+        }
+
+        .login-form {
+            padding: 40px 30px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: #f8f9fa;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group input::placeholder {
+            color: #aaa;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 43px;
+            cursor: pointer;
+            color: #888;
+            font-size: 18px;
+            user-select: none;
+        }
+
+        .password-toggle:hover {
+            color: #667eea;
+        }
+
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .remember-me input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .forgot-password {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .forgot-password:hover {
+            text-decoration: underline;
+        }
+
+        .login-button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .login-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .login-button:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 20px 0;
+            position: relative;
+            color: #888;
+            font-size: 14px;
+        }
+
+        .divider::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: #e1e8ed;
+            z-index: 1;
+        }
+
+        .divider span {
+            background: white;
+            padding: 0 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .register-link {
+            text-align: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            background: #fee;
+            color: #c33;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border: 1px solid #fcc;
+        }
+
+        .success-message {
+            background: #efe;
+            color: #363;
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            border: 1px solid #cfc;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .login-header {
+                padding: 30px 20px;
+            }
+            
+            .login-form {
+                padding: 30px 20px;
+            }
+            
+            .form-options {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-header">
+            <h1>Kayıt Olun</h1>
+            <p>Yeni hesap oluşturun</p>
+        </div>
+        
+        <div class="login-form">
+            <!-- Hata/Başarı mesajları için -->
+            <% if (typeof error !== 'undefined' && error) { %>
+                <div class="error-message">
+                    <%= error %>
+                </div>
+            <% } %>
+            
+            <% if (typeof success !== 'undefined' && success) { %>
+                <div class="success-message">
+                    <%= success %>
+                </div>
+            <% } %>
+            
+            <form action="/auth/register" method="POST" id="registerForm">
+                <div class="form-group">
+                    <label for="email">E-posta Adresi</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        placeholder="ornek@email.com"
+                        required
+                        autocomplete="email"
+                        value="<%= typeof formData !== 'undefined' ? formData.email || '' : '' %>"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Şifre</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        placeholder="En az 3 karakter"
+                        required
+                        autocomplete="new-password"
+                    >
+                    <span class="password-toggle" onclick="togglePassword('password')">👁</span>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Şifre Tekrar</label>
+                    <input 
+                        type="password" 
+                        id="confirmPassword" 
+                        name="confirmPassword" 
+                        placeholder="Şifrenizi tekrar girin"
+                        required
+                        autocomplete="new-password"
+                    >
+                    <span class="password-toggle" onclick="togglePassword('confirmPassword')" style="top: 43px;">👁</span>
+                </div>
+                
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="terms" id="terms" required>
+                        <span><a href="/terms" target="_blank" style="color: #667eea;">Kullanım Şartları</a>'nı kabul ediyorum</span>
+                    </label>
+                </div>
+                
+                <button type="submit" class="login-button">
+                    Kayıt Ol
+                </button>
+            </form>
+            
+            <div class="divider">
+                <span>veya</span>
+            </div>
+            
+            <div class="register-link">
+                Zaten hesabınız var mı? <a href="/auth/login">Giriş yapın</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function togglePassword(inputId) {
+            const passwordInput = document.getElementById(inputId);
+            const toggleIcon = passwordInput.nextElementSibling;
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.textContent = '🙈';
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.textContent = '👁';
+            }
+        }
+
+        // Form validasyonu
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            const terms = document.getElementById('terms').checked;
+            
+            // Zorunlu alanlar kontrolü
+            if (!email || !password || !confirmPassword) {
+                e.preventDefault();
+                alert('Lütfen tüm zorunlu alanları doldurun.');
+                return false;
+            }
+            
+            // E-posta formatı kontrolü
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                e.preventDefault();
+                alert('Lütfen geçerli bir e-posta adresi girin.');
+                return false;
+            }
+            
+            // Şifre uzunluğu kontrolü
+            if (password.length < 3) {
+                e.preventDefault();
+                alert('Şifre en az 3 karakter olmalıdır.');
+                return false;
+            }
+            
+            // Şifre eşleşme kontrolü
+            if (password !== confirmPassword) {
+                e.preventDefault();
+                alert('Şifreler eşleşmiyor.');
+                return false;
+            }
+            
+            // Kullanım şartları kontrolü
+            if (!terms) {
+                e.preventDefault();
+                alert('Kullanım şartlarını kabul etmelisiniz.');
+                return false;
+            }
+        });
+
+        // Şifre gücü göstergesi
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            const strengthIndicator = document.getElementById('passwordStrength') || createPasswordStrength();
+            
+            let strength = 0;
+            if (password.length >= 3) strength++;
+            if (password.length >= 6) strength++;
+            if (/[a-z]/.test(password)) strength++;
+            if (/[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            
+            const strengthTexts = ['Çok Zayıf', 'Zayıf', 'Orta', 'Güçlü', 'Çok Güçlü'];
+            const strengthColors = ['#ff4444', '#ff8844', '#ffaa44', '#44aa44', '#44ff44'];
+            
+            strengthIndicator.textContent = strengthTexts[strength] || '';
+            strengthIndicator.style.color = strengthColors[strength] || '';
+        });
+        
+        function createPasswordStrength() {
+            const passwordGroup = document.getElementById('password').parentElement;
+            const indicator = document.createElement('div');
+            indicator.id = 'passwordStrength';
+            indicator.style.cssText = 'font-size: 12px; margin-top: 5px; font-weight: 500;';
+            passwordGroup.appendChild(indicator);
+            return indicator;
+        }
+
+        // Enter tuşu ile form gönderme
+        document.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                document.getElementById('registerForm').submit();
+            }
+        });
+    </script>
+</body>
+</html>

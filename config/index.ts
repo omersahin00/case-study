@@ -31,7 +31,7 @@ const config = {
                 ? process.env.TOKEN_EXP_DAY
                 : "7"
         },
-        source: process.env.TOKEN_SOURCE || "headers", // headers || cookies
+        source: process.env.TOKEN_SOURCE || "cookies", // headers || cookies
         refreshPeriodMinute: process.env.TOKEN_REFRESH_PERIOD || "60" // Token'ın ne kadar sürede bir yenileneceğinin kaydı.
     },
 

@@ -50,7 +50,12 @@ const User = sequelize.define<UserInstance>("users", {
         defaultValue: DataTypes.NOW
     }
 }, {
-    timestamps: false /* yukarıda ataması var */
+    timestamps: false, /* yukarıda ataması var */
+    indexes: [ // index ile sorgu performansı artışı sağlanıyor:
+        {
+            fields: ["email"]
+        }
+    ]
 });
 
 export default User;

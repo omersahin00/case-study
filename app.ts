@@ -4,7 +4,7 @@ import cors from "cors";
 import { sequelize } from "@data/db";
 import cookieParser from "cookie-parser";
 import { environment, port } from "./config";
-import Schedulers from "./schedulers";
+import path from "path";
 
 const app = express();
 const server = http.createServer(app);
@@ -16,16 +16,27 @@ app.use(cors({
     credentials: true
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-import router from "./restAPI";
-app.use(router);
+// View Engine:
+app.set("view engine", "ejs");
+app.set("views", path.join(process.cwd(), "client", "views"));
+
+// ROUTES:
+import routerRestAPI from "./restAPI";
+app.use(routerRestAPI);
+
+// ROUTES:
+import routerClient from "./client";
+app.use(routerClient);
 
 import "./models"; // Model senkronizeleri için import edilmesi gerekiyor.
 // Global request tipleri için kullanılan tip dosyası:
 import globalTypes from "./types/globalTypes"; // KULLANIMDA SİLME!
 import unknownRoute from "./restAPI/domains/home/unknownRoute";
 import logger from "./services/logger";
+import Schedulers from "./schedulers";
 app.use(unknownRoute);
 
 (async (): Promise<void> => {

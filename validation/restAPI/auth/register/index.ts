@@ -4,24 +4,6 @@ import { environment } from "@/config";
 
 const validate = (data: RegisterRequest) => {
     const schema = Joi.object<RegisterRequest>({
-        firstName: Joi.string()
-            .min(2)
-            .max(50)
-            .required()
-            .messages({
-                'string.min': 'İsim en az 2 karakter olmalıdır',
-                'string.max': 'İsim en fazla 50 karakter olabilir',
-                'any.required': 'İsim alanı zorunludur'
-            }),
-        lastName: Joi.string()
-            .min(2)
-            .max(50)
-            .required()
-            .messages({
-                'string.min': 'Soyisim en az 2 karakter olmalıdır',
-                'string.max': 'Soyisim en fazla 50 karakter olabilir',
-                'any.required': 'Soyisim alanı zorunludur'
-            }),
         email: Joi.string()
             .email({ minDomainSegments: 2, tlds: { allow: ["com", "net", "edu", "tr", "space"] } })
             .required()
