@@ -6,6 +6,8 @@ import { bcrypt as bcryptConfig } from "@/config";
 import bcrypt from "bcryptjs";
 import safeStringCompare from "./safeStringCompare";
 import { EndpointReturn } from "@/types/endpointReturn";
+import addUserItem from "@/restAPI/services/addUserItem";
+import { items } from "@/data/mockData/item";
 
 export interface RegisterRequest {
     email: string;
@@ -67,6 +69,8 @@ const register = async (
             error: "Kayıt başarısız."
         }
     }
+    
+    await addUserItem(newUser.id, items[0].id);
 
     try {
         // Kullanıcı gelen bilgiler ile login oluyor:

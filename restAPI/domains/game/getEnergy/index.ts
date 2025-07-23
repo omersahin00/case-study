@@ -14,16 +14,15 @@ const getEnergy = async (
 
     const userData = req.user;
 
-    const energy = await Energy.findOne({
+    const userEnergy = await Energy.findOne({
         where: {
             userId: userData.id
-        },
-        raw: true
+        }
     });
 
     let _energy: EnergyAttributes;
 
-    if (!energy) {
+    if (!userEnergy) {
         _energy = await Energy.create({
             userId: userData.id,
             value: 0
@@ -46,11 +45,20 @@ const getEnergy = async (
         }
 
     } else {
+        const addedUserXp = Date.now() - new Date(userEnergy.updatedAt).getTime() / (60 * 1000);
+
+        if (addedUserXp > 0 && userEnergy.value <= 100) {
+            userEnergy.value += addedUserXp;
+            if (userEnergy.value > 100) userEnergy.value = 100;
+
+            await userEnergy.save();
+        }
+
         return {
             statusCode: 200,
             data: {
                 message: "Enerji değeri gönderildi.",
-                energy: energy.value
+                energy: userEnergy.value
             }
         }
     }

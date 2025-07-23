@@ -4,11 +4,14 @@ import { DataTypes, Model } from "sequelize";
 export interface ItemCreationAttributes {
     id?: string;
     name: string;
+    levelPeriod: number;
 }
 
 export interface ItemAttributes {
     id: string;
     name: string;
+    levelPeriod: number;
+    xp?: number;
 }
 
 export interface ItemInstance extends Model<ItemAttributes, ItemCreationAttributes>, ItemAttributes {}
@@ -22,6 +25,11 @@ const Item = sequelize.define<ItemInstance>("items", {
     },
     name: {
         type: DataTypes.STRING,
+        allowNull: false
+    },
+    levelPeriod: {
+        type: DataTypes.INTEGER,
+        defaultValue: 50,
         allowNull: false
     }
 }, { timestamps: false });

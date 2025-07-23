@@ -3,10 +3,11 @@ import { sequelize } from "../db";
 import logger from "@/services/logger";
 import { AxiosError } from "axios";
 
-const items = [
+export const items = [
     {
         id: "b7e1c2a2-3f4b-4e2a-9c1d-8a7f6e5d4c3b",
-        name: "Sword"
+        name: "Sword",
+        levelPeriod: 50
     }
 ];
 
@@ -28,7 +29,8 @@ const addItems = async () => {
                 } else {
                     await Item.create({
                         id: item.id,
-                        name: item.name
+                        name: item.name,
+                        levelPeriod: item.levelPeriod
                     }, { transaction });
                 }
             })

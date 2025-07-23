@@ -19,9 +19,8 @@ const postLoginPage = async (
     try {
         const { email, password, remember } = req.body;
 
-        // Kendi API'mize istek gönder - validasyon API tarafında yapılacak
         const apiUrl = `${req.protocol}://${req.get('host')}/api/auth/login`;
-        
+
         const response = await axios.post(apiUrl, {
             email,
             password
@@ -40,7 +39,7 @@ const postLoginPage = async (
                     maxAge: remember ? 7 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000 // 7 gün veya 1 gün
                 };
 
-                res.cookie("authToken", response.data.token, cookieOptions);
+                res.cookie("token", response.data.token, cookieOptions);
             }
 
             // Ana sayfaya yönlendir

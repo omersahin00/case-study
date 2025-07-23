@@ -18,6 +18,7 @@ import getEnergy from "./domains/game/getEnergy";
 import login from "./domains/auth/login";
 import register from "./domains/auth/register";
 import refreshToken from "./domains/auth/refreshtoken";
+import upgradeItem from "./domains/game/upgradeItem";
 
 export const endpoints: EndpointGroup = {
     api: {
@@ -33,7 +34,8 @@ export const endpoints: EndpointGroup = {
         },
         game: {
             getItem: { handler: getItem, method: "GET", auth: true },
-            getEnergy: { handler: getEnergy, method: "GET", auth: true }
+            getEnergy: { handler: getEnergy, method: "GET", auth: true },
+            upgradeItem: { handler: upgradeItem, method: "POST", auth: true },
         }
     }
 };

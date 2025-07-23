@@ -1,3 +1,4 @@
+import { UserItem } from "@/models";
 import Item, { ItemAttributes } from "@/models/item";
 import { EndpointReturn } from "@/types/endpointReturn";
 import { Request, Response } from "express";
@@ -15,7 +16,8 @@ const getItem = async (
     req: Request<{}, any, {}, GetItemQuery>,
     res: Response<GetItemResponse>
 ): Promise<EndpointReturn<GetItemResponse>> => {
-    
+
+    const userData = req.user;
     const itemId = req.query.itemId;
 
     const item = await Item.findOne({
@@ -24,6 +26,26 @@ const getItem = async (
         },
         raw: true
     });
+
+    const itemXp = await UserItem.findOne({
+        where: {
+            userId: userData.id,
+            itemId: itemId
+        },
+        raw: true
+    });
+
+    if (!item || !itemXp) {
+        return {
+            statusCode: 500,
+            data: {
+                message: "Item bulunamadı!",
+                item: undefined
+            }
+        }
+    }
+
+    item.xp = itemXp.xp;
 
     return {
         statusCode: item ? 200 : 500,
