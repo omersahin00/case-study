@@ -43,6 +43,8 @@ const upgradeItem = async (
         }
     }
 
+    itemData.maxLevel--;
+
     const addedUserXp = Math.floor((Date.now() - new Date(userEnergy.updatedAt).getTime()) / (60 * 1000));
 
     const transaction = await sequelize.transaction();

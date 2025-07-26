@@ -45,8 +45,10 @@ const getItem = async (
         }
     }
 
-    item.level = Math.ceil(itemXp.xp / item.levelPeriod);
+    item.maxLevel--;
+    item.level = Math.floor(itemXp.xp / item.levelPeriod) + 1;
     item.xp = itemXp.xp % item.levelPeriod;
+    item.maxXp = item.levelPeriod * item.maxLevel;
 
     if (itemXp.xp === item.levelPeriod * item.maxLevel) {
         item.isMaxLevel = true;

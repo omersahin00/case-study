@@ -395,7 +395,7 @@
         
         <!-- Level başlığı -->
         <h2 class="level-title">Level <%= item.level || 1 %></h2>
-        
+
         <!-- İstatistikler -->
         <div class="stats-container">
             <div class="stat-item">
@@ -454,7 +454,12 @@
         const UPGRADE_DELAY = 2000; // 2 saniye bekle
         const XP_PER_UPGRADE = 2; // Her upgrade için XP
         let currentEnergy = parseInt('<%= energy || 0 %>'); // Controller'dan gelen energy (let ile değiştirilebilir yaptık)
-        
+
+        // Item verileri
+        const itemLevel = parseInt('<%= item.level || 1 %>');
+        const itemXp = parseInt('<%= item.xp || 0 %>');
+        const itemMaxXp = parseInt('<%= item.maxXp || 1000 %>');
+
         // Energy güncelleme timer'ı
         let energyUpdateTimer = null;
 
@@ -467,6 +472,23 @@
             if (upgradeQueue + XP_PER_UPGRADE > currentEnergy) {
                 const messageArea = document.getElementById('messageArea');
                 messageArea.innerHTML = `<div class="error-message">⚡ Yetersiz enerji! Maksimum ${currentEnergy} XP kullanabilirsiniz.</div>`;
+                
+                // Mesajı 3 saniye sonra temizle
+                setTimeout(() => {
+                    messageArea.innerHTML = '';
+                }, 3000);
+                
+                return;
+            }
+            
+            // MaxXp kontrolü - (mevcut XP + queue + yeni XP) * level > maxXp ise izin verme
+            const projectedTotalXp = (itemXp + upgradeQueue + XP_PER_UPGRADE) * itemLevel;
+            if (projectedTotalXp > itemMaxXp) {
+                const currentTotalXp = (itemXp + upgradeQueue) * itemLevel;
+                const remainingXp = Math.floor((itemMaxXp - currentTotalXp) / itemLevel);
+                
+                const messageArea = document.getElementById('messageArea');
+                messageArea.innerHTML = `<div class="error-message">🏆 Maximum XP sınırına ulaştınız! Kalan kullanılabilir XP: ${remainingXp}</div>`;
                 
                 // Mesajı 3 saniye sonra temizle
                 setTimeout(() => {
@@ -507,11 +529,28 @@
                 btn.classList.remove('stacked');
             }
             
+            let shouldDisable = false;
+            let disableReason = '';
+            
             // Energy kontrolü - eğer bir sonraki upgrade için yeterli energy yoksa butonu devre dışı bırak
             if (upgradeQueue + XP_PER_UPGRADE > currentEnergy) {
+                shouldDisable = true;
+                disableReason = `Yetersiz enerji! Mevcut: ${currentEnergy}, Gerekli: ${upgradeQueue + XP_PER_UPGRADE}`;
+            }
+            
+            // MaxXp kontrolü - eğer maxXp sınırını aşacaksa butonu devre dışı bırak
+            const projectedTotalXp = (itemXp + upgradeQueue + XP_PER_UPGRADE) * itemLevel;
+            if (projectedTotalXp > itemMaxXp) {
+                shouldDisable = true;
+                const currentTotalXp = (itemXp + upgradeQueue) * itemLevel;
+                const remainingXp = Math.floor((itemMaxXp - currentTotalXp) / itemLevel);
+                disableReason = `Maximum XP sınırına ulaşıldı! Kalan: ${remainingXp} XP`;
+            }
+            
+            if (shouldDisable) {
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
-                btn.title = `Yetersiz enerji! Mevcut: ${currentEnergy}, Gerekli: ${upgradeQueue + XP_PER_UPGRADE}`;
+                btn.title = disableReason;
             } else {
                 btn.disabled = false;
                 btn.style.opacity = '1';

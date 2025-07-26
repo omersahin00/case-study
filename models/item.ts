@@ -15,6 +15,7 @@ export interface ItemAttributes {
     xp?: number;
     level?: number;
     isMaxLevel?: boolean;
+    maxXp?: number;
 }
 
 export interface ItemInstance extends Model<ItemAttributes, ItemCreationAttributes>, ItemAttributes {}
