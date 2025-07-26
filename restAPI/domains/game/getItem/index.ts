@@ -45,7 +45,15 @@ const getItem = async (
         }
     }
 
-    item.xp = itemXp.xp;
+    item.level = Math.ceil(itemXp.xp / item.levelPeriod);
+    item.xp = itemXp.xp % item.levelPeriod;
+
+    if (itemXp.xp === item.levelPeriod * item.maxLevel) {
+        item.isMaxLevel = true;
+        item.xp = item.levelPeriod;
+    } else {
+        item.isMaxLevel = false;
+    }
 
     return {
         statusCode: item ? 200 : 500,

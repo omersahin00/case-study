@@ -33,12 +33,10 @@ const getItemPage = async (
     }
 
     return res.render("game/items", {
-        level: 1,
-        experience: enegyRespItem.data.item.xp,
-        nextLevelXP: 50,
-        itemId: enegyRespItem.data.id,
+        itemId: enegyRespItem.data.item.id,
+        item: enegyRespItem.data.item,
         energy: enegyRespEnergy.data.energy,
-        maxEnergy
+        maxEnergy,
     });
 }
 
@@ -46,7 +44,7 @@ const postItemPage = async (
     req: Request,
     res: Response
 ) => {
-    
+    return res.status(405).json({ message: "Method not allowed" });
 }
 
 export { getItemPage, postItemPage };

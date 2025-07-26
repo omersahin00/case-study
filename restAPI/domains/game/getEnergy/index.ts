@@ -45,7 +45,10 @@ const getEnergy = async (
         }
 
     } else {
-        const addedUserXp = Date.now() - new Date(userEnergy.updatedAt).getTime() / (60 * 1000);
+        const addedUserXp = Math.floor((Date.now() - new Date(userEnergy.updatedAt).getTime()) / (60 * 1000));
+
+        console.log("Enerjiye eklenen değer:", addedUserXp);
+        
 
         if (addedUserXp > 0 && userEnergy.value <= 100) {
             userEnergy.value += addedUserXp;

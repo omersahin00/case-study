@@ -11,7 +11,10 @@ export interface ItemAttributes {
     id: string;
     name: string;
     levelPeriod: number;
+    maxLevel: number;
     xp?: number;
+    level?: number;
+    isMaxLevel?: boolean;
 }
 
 export interface ItemInstance extends Model<ItemAttributes, ItemCreationAttributes>, ItemAttributes {}
@@ -30,6 +33,11 @@ const Item = sequelize.define<ItemInstance>("items", {
     levelPeriod: {
         type: DataTypes.INTEGER,
         defaultValue: 50,
+        allowNull: false
+    },
+    maxLevel: {
+        type: DataTypes.INTEGER,
+        defaultValue: 3,
         allowNull: false
     }
 }, { timestamps: false });

@@ -166,6 +166,16 @@
             overflow: hidden;
         }
 
+        .level-bar.max-level {
+            background: linear-gradient(90deg, #FFD700, #FFA500, #FF6347);
+            animation: maxLevelGlow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes maxLevelGlow {
+            0% { box-shadow: 0 0 5px #FFD700; }
+            100% { box-shadow: 0 0 20px #FFD700, 0 0 30px #FFA500; }
+        }
+
         .level-bar::before {
             content: '';
             position: absolute;
@@ -187,6 +197,13 @@
             color: #666;
             margin-top: 5px;
             font-weight: 500;
+        }
+
+        .level-text.max-level-text {
+            color: #FFD700;
+            font-weight: bold;
+            font-size: 14px;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
         }
 
         .upgrade-btn {
@@ -231,11 +248,41 @@
             box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
+        .upgrade-btn.stacked {
+            background: linear-gradient(135deg, #ff6b6b 0%, #feca57 100%);
+            animation: pulse 1s infinite;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+
+        .upgrade-btn.stacked:hover {
+            background: linear-gradient(135deg, #ff5252 0%, #ffb300 100%);
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.4);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
         .upgrade-btn:disabled {
             background: #ccc;
             cursor: not-allowed;
             transform: none;
             box-shadow: none;
+        }
+
+        .max-level-btn {
+            background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%) !important;
+            color: #333 !important;
+            font-weight: bold;
+            cursor: default !important;
+            animation: maxLevelPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes maxLevelPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
         }
 
         .upgrade-btn:disabled::before {
@@ -327,6 +374,7 @@
         }
     </style>
 </head>
+
 <body>
     <!-- Enerji Barı -->
     <div class="energy-bar-wrapper">
@@ -340,98 +388,191 @@
 
     <div class="game-card">
         <!-- Level fotoğrafı (controller'dan gelecek level bilgisine göre) -->
-        <img src="/img/level<%= level || 1 %>.png" 
-             alt="Level <%= level || 1 %>" 
+        <img src="/img/level<%= item.level || 1 %>.png" 
+             alt="Level <%= item.level || 1 %>" 
              class="level-image"
              onerror="this.src='/img/level1.png'">
         
         <!-- Level başlığı -->
-        <h2 class="level-title">Level <%= level || 1 %></h2>
+        <h2 class="level-title">Level <%= item.level || 1 %></h2>
         
         <!-- İstatistikler -->
         <div class="stats-container">
             <div class="stat-item">
-                <div class="stat-value"><%= level || 1 %></div>
+                <div class="stat-value"><%= item.level || 1 %></div>
                 <div class="stat-label">Seviye</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value"><%= experience || 0 %></div>
+                <div class="stat-value"><%= item.xp || 0 %></div>
                 <div class="stat-label">XP</div>
             </div>
             <div class="stat-item">
-                <div class="stat-value"><%= nextLevelXP || 100 %></div>
+                <div class="stat-value"><%= item.levelPeriod || 100 %></div>
                 <div class="stat-label">Hedef XP</div>
             </div>
         </div>
-        
+
         <!-- Level barı -->
         <div class="level-bar-container">
-            <div class="level-bar" data-progress="<%= experience || 0 %>" data-max="<%= nextLevelXP || 100 %>"></div>
+            <% if (item.isMaxLevel) { %>
+                <div class="level-bar max-level" style="width: 100%;" data-progress="100" data-max="100"></div>
+            <% } else { %>
+                <div class="level-bar" data-progress="<%= item.xp || 0 %>" data-max="<%= item.levelPeriod || 100 %>"></div>
+            <% } %>
         </div>
-        <div class="level-text">
-            XP: <%= experience || 0 %>/<%= nextLevelXP || 100 %>
+        <div class="level-text <%= item.isMaxLevel ? 'max-level-text' : '' %>">
+            <% if (item.isMaxLevel) { %>
+                🏆 MAX LEVEL REACHED!
+            <% } else { %>
+                XP: <%= item.xp || 0 %>/<%= item.levelPeriod || 100 %>
+            <% } %>
         </div>
-        
+
         <!-- Mesaj alanı -->
         <div id="messageArea"></div>
-        
+
         <!-- Upgrade butonu -->
-        <form id="upgradeForm">
-            <input type="hidden" name="itemId" value="<%= itemId || 'default_item' %>">
-            <button type="submit" class="upgrade-btn" id="upgradeBtn">
-                Level Up!
+        <% if (item.isMaxLevel) { %>
+            <button type="button" class="upgrade-btn max-level-btn" disabled>
+                👑 MAX LEVEL
             </button>
-        </form>
+        <% } else { %>
+            <form id="upgradeForm">
+                <input type="hidden" name="itemId" value="<%= itemId || 'default_item' %>">
+                <button type="submit" class="upgrade-btn" id="upgradeBtn">
+                    🚀 Level Up!
+                </button>
+            </form>
+        <% } %>
     </div>
 
     <script>
-        document.getElementById('upgradeForm').addEventListener('submit', async function(e) {
+        // Upgrade stack sistemi
+        let upgradeQueue = 0; // Toplam XP stack
+        let upgradeTimer = null;
+        let isProcessing = false;
+        const UPGRADE_DELAY = 2000; // 2 saniye bekle
+        const XP_PER_UPGRADE = 2; // Her upgrade için XP
+        let currentEnergy = parseInt('<%= energy || 0 %>'); // Controller'dan gelen energy (let ile değiştirilebilir yaptık)
+        
+        // Energy güncelleme timer'ı
+        let energyUpdateTimer = null;
+
+        document.getElementById('upgradeForm')?.addEventListener('submit', async function(e) {
             e.preventDefault();
+            
+            if (isProcessing) return; // Eğer işlem devam ediyorsa yeni upgrade'e izin verme
+            
+            // Energy kontrolü - şu anki queue + yeni XP > energy ise izin verme
+            if (upgradeQueue + XP_PER_UPGRADE > currentEnergy) {
+                const messageArea = document.getElementById('messageArea');
+                messageArea.innerHTML = `<div class="error-message">⚡ Yetersiz enerji! Maksimum ${currentEnergy} XP kullanabilirsiniz.</div>`;
+                
+                // Mesajı 3 saniye sonra temizle
+                setTimeout(() => {
+                    messageArea.innerHTML = '';
+                }, 3000);
+                
+                return;
+            }
             
             const btn = document.getElementById('upgradeBtn');
             const messageArea = document.getElementById('messageArea');
-            const formData = new FormData(this);
-
-            // Butonu disable et ve loading göster
+            
+            // Stack'e ekle
+            upgradeQueue += XP_PER_UPGRADE;
+            
+            // UI'ı güncelle
+            updateUpgradeButton();
+            
+            // Timer'ı sıfırla ve yeniden başlat
+            if (upgradeTimer) {
+                clearTimeout(upgradeTimer);
+            }
+            
+            upgradeTimer = setTimeout(async () => {
+                await processUpgradeQueue();
+            }, UPGRADE_DELAY);
+        });
+        
+        function updateUpgradeButton() {
+            const btn = document.getElementById('upgradeBtn');
+            if (!btn) return; // Max level durumunda buton olmayabilir
+            
+            if (upgradeQueue > 0) {
+                btn.textContent = `🚀 Level Up! (+${upgradeQueue} XP)`;
+                btn.classList.add('stacked');
+            } else {
+                btn.textContent = '🚀 Level Up!';
+                btn.classList.remove('stacked');
+            }
+            
+            // Energy kontrolü - eğer bir sonraki upgrade için yeterli energy yoksa butonu devre dışı bırak
+            if (upgradeQueue + XP_PER_UPGRADE > currentEnergy) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.title = `Yetersiz enerji! Mevcut: ${currentEnergy}, Gerekli: ${upgradeQueue + XP_PER_UPGRADE}`;
+            } else {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.title = '';
+            }
+        }
+        
+        async function processUpgradeQueue() {
+            if (upgradeQueue === 0 || isProcessing) return;
+            
+            isProcessing = true;
+            const btn = document.getElementById('upgradeBtn');
+            const messageArea = document.getElementById('messageArea');
+            const totalXP = upgradeQueue;
+            
+            // UI'ı güncelle
             btn.disabled = true;
             btn.classList.add('loading');
             btn.textContent = '';
             messageArea.innerHTML = '';
 
+            // Queue'yu sıfırla
+            upgradeQueue = 0;
+            updateUpgradeButton();
+            
             try {
-                const response = await fetch(window.location.href, {
-                    method: 'POST',
-                    body: formData
-                });
+                const requestData = {
+                    itemId: document.querySelector('input[name="itemId"]').value,
+                    xp: totalXP
+                };
 
-                if (response.redirected) {
-                    // Redirect varsa sayfayı yenile
-                    window.location.reload();
+                const response = await fetch('/api/game/upgradeItem', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (response.ok) {
+                    messageArea.innerHTML = `<div class="success-message">+${totalXP} XP ekleniyor!</div>`;
+                    
+                    // Sayfayı yenile (veya sadece verileri güncelle)
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
                 } else {
                     const result = await response.json();
-                    
-                    if (response.ok && result.success) {
-                        messageArea.innerHTML = `<div class="success-message">${result.message || 'Level başarıyla yükseltildi!'}</div>`;
-                        
-                        // Sayfayı yenile
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        messageArea.innerHTML = `<div class="error-message">${result.message || 'Level yükseltme başarısız!'}</div>`;
-                    }
+                    messageArea.innerHTML = `<div class="error-message">${result.message || 'Level yükseltme başarısız!'}</div>`;
                 }
+                
             } catch (error) {
                 messageArea.innerHTML = `<div class="error-message">Bir hata oluştu: ${error.message}</div>`;
             } finally {
                 // Butonu tekrar aktif et
                 btn.disabled = false;
                 btn.classList.remove('loading');
-                btn.textContent = '🚀 Level Up!';
+                updateUpgradeButton();
+                isProcessing = false;
             }
-        });
-
-        // Sayfa yüklendiğinde animasyonları başlat
+        }        // Sayfa yüklendiğinde animasyonları başlat
         document.addEventListener('DOMContentLoaded', function() {
             const card = document.querySelector('.game-card');
             const levelBar = document.querySelector('.level-bar');
@@ -448,11 +589,28 @@
             // Enerji barını güncelle
             updateEnergyBar();
             
+            // Upgrade butonunun ilk durumunu ayarla
+            updateUpgradeButton();
+            
+            // Energy güncelleme timer'ını başlat
+            startEnergyUpdateTimer();
+            
             setTimeout(() => {
                 card.style.transition = 'all 0.8s ease';
                 card.style.opacity = '1';
                 card.style.transform = 'translateY(0)';
             }, 100);
+        });
+
+        // Sayfa kapatıldığında timer'ları temizle
+        window.addEventListener('beforeunload', function() {
+            if (energyUpdateTimer) {
+                clearTimeout(energyUpdateTimer);
+                clearInterval(energyUpdateTimer);
+            }
+            if (upgradeTimer) {
+                clearTimeout(upgradeTimer);
+            }
         });
 
         // Enerji barını güncelle
@@ -461,14 +619,58 @@
             const energyText = document.querySelector('.energy-text');
             
             if (energyBar && energyText) {
-                const energy = parseInt(energyBar.dataset.energy);
                 const maxEnergy = parseInt(energyBar.dataset.maxEnergy);
-                const percentage = (energy / maxEnergy) * 100;
+                const percentage = (currentEnergy / maxEnergy) * 100;
                 
                 // CSS custom property ile genişliği ayarla
                 energyBar.style.setProperty('--energy-percentage', percentage + '%');
-                energyText.textContent = `⚡ Enerji: ${energy} / ${maxEnergy}`;
+                energyText.textContent = `⚡ Enerji: ${currentEnergy} / ${maxEnergy}`;
+                
+                // Energy data attribute'unu da güncelle
+                energyBar.dataset.energy = currentEnergy;
             }
+        }
+
+        // Energy'yi API'den güncelle
+        async function updateEnergyFromAPI() {
+            try {
+                const response = await fetch('/api/game/getEnergy', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    const newEnergy = result.energy || 0;
+                    
+                    // Energy değişti mi kontrol et
+                    if (newEnergy !== currentEnergy) {
+                        console.log(`Energy güncellendi: ${currentEnergy} → ${newEnergy}`);
+                        currentEnergy = newEnergy;
+                        
+                        // UI'ı güncelle
+                        updateEnergyBar();
+                        updateUpgradeButton(); // Buton durumunu da güncelle
+                    }
+                } else {
+                    console.warn('Energy güncellenirken hata oluştu:', response.status);
+                }
+            } catch (error) {
+                console.error('Energy güncelleme hatası:', error);
+            }
+        }
+
+        // Energy güncelleme timer'ını başlat
+        function startEnergyUpdateTimer() {
+            // İlk güncelleme 1 dakika sonra
+            energyUpdateTimer = setTimeout(() => {
+                updateEnergyFromAPI();
+                
+                // Sonrasında her dakika güncelle
+                energyUpdateTimer = setInterval(updateEnergyFromAPI, 60000); // 60 saniye
+            }, 60000); // İlk çalışma 60 saniye sonra
         }
     </script>
 </body>
