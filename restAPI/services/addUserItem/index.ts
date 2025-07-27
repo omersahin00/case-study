@@ -5,7 +5,8 @@ const addUserItem = async (userId: string, itemId: string) => {
         await UserItem.create({
             userId,
             itemId,
-            xp: 0
+            xp: 0,
+            level: 1
         });
 
         return true;

@@ -437,12 +437,23 @@
                 👑 MAX LEVEL
             </button>
         <% } else { %>
-            <form id="upgradeForm">
-                <input type="hidden" name="itemId" value="<%= itemId || 'default_item' %>">
-                <button type="submit" class="upgrade-btn" id="upgradeBtn">
-                    🚀 Level Up!
-                </button>
-            </form>
+            <!-- XP levelPeriod'a eşit ise Level Up butonu -->
+            <% if (item.xp >= item.levelPeriod) { %>
+                <form id="levelUpForm">
+                    <input type="hidden" name="itemId" value="<%= itemId || 'default_item' %>">
+                    <button type="submit" class="upgrade-btn" id="levelUpBtn" style="background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);">
+                        🚀 Level Up!
+                    </button>
+                </form>
+            <% } else { %>
+                <!-- Normal XP artırma butonu -->
+                <form id="upgradeForm">
+                    <input type="hidden" name="itemId" value="<%= itemId || 'default_item' %>">
+                    <button type="submit" class="upgrade-btn" id="upgradeBtn">
+                        ⚡ Geliştir
+                    </button>
+                </form>
+            <% } %>
         <% } %>
     </div>
 
@@ -459,6 +470,10 @@
         const itemLevel = parseInt('<%= item.level || 1 %>');
         const itemXp = parseInt('<%= item.xp || 0 %>');
         const itemMaxXp = parseInt('<%= item.maxXp || 1000 %>');
+        const itemLevelPeriod = parseInt('<%= item.levelPeriod || 100 %>');
+        
+        // XP level atlamaya hazır mı?
+        const isReadyToLevelUp = itemXp >= itemLevelPeriod;
 
         // Energy güncelleme timer'ı
         let energyUpdateTimer = null;
@@ -498,6 +513,22 @@
                 return;
             }
             
+            // LevelPeriod kontrolü - XP levelPeriod'u geçemez
+            const projectedXp = itemXp + upgradeQueue + XP_PER_UPGRADE;
+            if (projectedXp > itemLevelPeriod) {
+                const remainingToLevelPeriod = itemLevelPeriod - (itemXp + upgradeQueue);
+                
+                const messageArea = document.getElementById('messageArea');
+                messageArea.innerHTML = `<div class="error-message">🎯 Level döngüsü sınırına ulaştınız! Kalan XP: ${remainingToLevelPeriod}. Level up için ${itemLevelPeriod} XP'ye ulaşmanız gerek.</div>`;
+                
+                // Mesajı 3 saniye sonra temizle
+                setTimeout(() => {
+                    messageArea.innerHTML = '';
+                }, 3000);
+                
+                return;
+            }
+            
             const btn = document.getElementById('upgradeBtn');
             const messageArea = document.getElementById('messageArea');
             
@@ -517,15 +548,67 @@
             }, UPGRADE_DELAY);
         });
         
+        // Level Up form event listener
+        document.getElementById('levelUpForm')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            if (isProcessing) return;
+            
+            isProcessing = true;
+            const btn = document.getElementById('levelUpBtn');
+            const messageArea = document.getElementById('messageArea');
+            
+            // UI'ı güncelle
+            btn.disabled = true;
+            btn.classList.add('loading');
+            btn.textContent = '';
+            messageArea.innerHTML = '';
+            
+            try {
+                const requestData = {
+                    itemId: document.querySelector('#levelUpForm input[name="itemId"]').value
+                };
+
+                const response = await fetch('/api/game/levelUp', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                if (response.ok) {
+                    messageArea.innerHTML = `<div class="success-message">🚀 Level atlanıyor!</div>`;
+                    
+                    // Sayfayı yenile
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    const result = await response.json();
+                    messageArea.innerHTML = `<div class="error-message">${result.message || 'Level atlama başarısız!'}</div>`;
+                }
+                
+            } catch (error) {
+                messageArea.innerHTML = `<div class="error-message">Bir hata oluştu: ${error.message}</div>`;
+            } finally {
+                // Butonu tekrar aktif et
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                btn.textContent = '🚀 Level Up!';
+                isProcessing = false;
+            }
+        });
+        
         function updateUpgradeButton() {
             const btn = document.getElementById('upgradeBtn');
             if (!btn) return; // Max level durumunda buton olmayabilir
             
             if (upgradeQueue > 0) {
-                btn.textContent = `🚀 Level Up! (+${upgradeQueue} XP)`;
+                btn.textContent = `⚡ Geliştir (+${upgradeQueue} XP)`;
                 btn.classList.add('stacked');
             } else {
-                btn.textContent = '🚀 Level Up!';
+                btn.textContent = '⚡ Geliştir';
                 btn.classList.remove('stacked');
             }
             
@@ -545,6 +628,14 @@
                 const currentTotalXp = (itemXp + upgradeQueue) * itemLevel;
                 const remainingXp = Math.floor((itemMaxXp - currentTotalXp) / itemLevel);
                 disableReason = `Maximum XP sınırına ulaşıldı! Kalan: ${remainingXp} XP`;
+            }
+            
+            // LevelPeriod kontrolü - eğer levelPeriod sınırını aşacaksa butonu devre dışı bırak
+            const projectedXp = itemXp + upgradeQueue + XP_PER_UPGRADE;
+            if (projectedXp > itemLevelPeriod) {
+                shouldDisable = true;
+                const remainingToLevelPeriod = itemLevelPeriod - (itemXp + upgradeQueue);
+                disableReason = `Level döngüsü sınırına ulaşıldı! Kalan: ${remainingToLevelPeriod} XP`;
             }
             
             if (shouldDisable) {

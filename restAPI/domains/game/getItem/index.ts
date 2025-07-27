@@ -27,7 +27,7 @@ const getItem = async (
         raw: true
     });
 
-    const itemXp = await UserItem.findOne({
+    const itemData = await UserItem.findOne({
         where: {
             userId: userData.id,
             itemId: itemId
@@ -35,7 +35,7 @@ const getItem = async (
         raw: true
     });
 
-    if (!item || !itemXp) {
+    if (!item || !itemData) {
         return {
             statusCode: 500,
             data: {
@@ -45,14 +45,13 @@ const getItem = async (
         }
     }
 
-    item.maxLevel--;
-    item.level = Math.floor(itemXp.xp / item.levelPeriod) + 1;
-    item.xp = itemXp.xp % item.levelPeriod;
-    item.maxXp = item.levelPeriod * item.maxLevel;
+    item.maxLevel;
+    item.level = itemData.level;
+    item.xp = itemData.xp;
+    item.maxXp = item.levelPeriod * (item.maxLevel - 1);
 
-    if (itemXp.xp === item.levelPeriod * item.maxLevel) {
+    if (item.level === item.maxLevel) {
         item.isMaxLevel = true;
-        item.xp = item.levelPeriod;
     } else {
         item.isMaxLevel = false;
     }

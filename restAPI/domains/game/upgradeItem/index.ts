@@ -63,7 +63,11 @@ const upgradeItem = async (
 
         await userEnergy.save({ transaction });
 
-        item.xp += xp;
+        if (item.xp + xp > itemData.levelPeriod) {
+            item.xp = itemData.levelPeriod;
+        } else {
+            item.xp += xp;
+        }
 
         if (item.xp > itemData.maxLevel * itemData.levelPeriod) {
             item.xp = itemData.maxLevel * itemData.levelPeriod;

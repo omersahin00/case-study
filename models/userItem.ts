@@ -6,6 +6,7 @@ export interface UserItemAttributes {
     userId: string;
     itemId: string;
     xp: number;
+    level: number;
 }
 
 export interface UserItemInstance extends Model<UserItemAttributes>, UserItemAttributes {}
@@ -28,6 +29,11 @@ const UserItem = sequelize.define<UserItemInstance>("userItems", {
     xp: {
         type: DataTypes.INTEGER,
         defaultValue: 0,
+        allowNull: false
+    },
+    level: {
+        type: DataTypes.INTEGER,
+        defaultValue: 1,
         allowNull: false
     }
 }, {
